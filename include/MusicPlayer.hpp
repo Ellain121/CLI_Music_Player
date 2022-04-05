@@ -28,6 +28,7 @@ class MusicPlayer
         bool    isStreamDone();
     
     private:
+        float   getPreviousStreamVolume() const;
         void    setVolume(const float& volume);
         void    endStream();
 

@@ -19,10 +19,12 @@ bool MusicPlayer::isStreamDone()
 
 void MusicPlayer::loadMusic(const std::string& path)
 {
+    float volume = getPreviousStreamVolume();
     endStream();
     
     mFileCreated = true;
     mStream = BASS_StreamCreateFile(0, path.c_str(), 0, 0, 0);
+    setVolume(volume);
 }
 
 void MusicPlayer::play()
@@ -47,6 +49,16 @@ void MusicPlayer::toggle()
     {
         play();
     }
+}
+
+float MusicPlayer::getPreviousStreamVolume() const
+{
+    float volume = 1.f;
+    if (mFileCreated == true)
+    {
+        volume = getVolume();
+    }
+    return volume;
 }
 
 int MusicPlayer::getProgressSeconds() const
