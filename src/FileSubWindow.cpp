@@ -50,7 +50,7 @@ void FileSubWindow::draw() const
     size_t filesAmount = fileManager.getFilesAmount();
     tempX = bounds.x2 - 10;
     int tempY = bounds.y2;
-    mvprintw(tempY, tempX, "%d/%d", relativeSelectedIndx + 1, filesAmount);
+    mvprintw(tempY, tempX, "%d/%d", selectedFileIndx + 1, filesAmount);
 }
 
 void FileSubWindow::update()
