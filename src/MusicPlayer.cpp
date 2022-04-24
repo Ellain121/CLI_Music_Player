@@ -1,9 +1,15 @@
 #include "MusicPlayer.hpp"
+#include <iostream>
 
 MusicPlayer::MusicPlayer()
 : mFileCreated(false)
 , mMusicPlaying(false)
 {
+    int pluginFlac = BASS_PluginLoad("/home/jonathan/Downloads/bassflac24-linux/x64/libbassflac.so", 0);
+    if (pluginFlac == 0)
+    {
+        throw std::logic_error(std::to_string(pluginFlac));
+    }
     BASS_Init(-1, 44100, BASS_DEVICE_3D, 0, 0);
 }
 
