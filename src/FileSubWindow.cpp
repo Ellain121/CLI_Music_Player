@@ -7,14 +7,13 @@
 FileSubWindow::FileSubWindow(Context context, const std::string& programDir
     , const Rectangle& bounds)
 : SubWindow(context, programDir, bounds)
-, mFileManager(programDir, bounds.getSizeY())
+, mFileManager(programDir, bounds.getSizeY(), FileManager::Mode::MusicPlayer)
 {
 }
 
 void FileSubWindow::draw() const
 {
     auto& bounds = getBounds();
-    auto& programDir = getProgramDir();
 
     drawRectangle();
     auto visibleFiles = mFileManager.getVisibleFiles();
@@ -35,8 +34,9 @@ void FileSubWindow::draw() const
         {
             attron(COLOR_PAIR(1));
         }
-            print_in_boundaries(y, x, *visibleFiles[i], bounds.x2 - 4);
-            attroff(A_REVERSE | COLOR_PAIR(1));
+
+        print_in_boundaries(y, x, *visibleFiles[i], bounds.x2 - 4);
+        attroff(A_REVERSE | COLOR_PAIR(1));
         y++;
     }
     size_t selectedFileIndx = mFileManager.getSelectedFileIndx();
@@ -50,11 +50,24 @@ void FileSubWindow::update()
 {
     auto& pEvents = *getContext().mProgEvents;
 
-    if (pEvents.size() > 0)
+    for (auto& pEvent : pEvents)
     {
-        playNextMusic();
-        pEvents.clear();
+        if (pEvent.eventType == ProgramEventType::MusicFinished)
+        {
+            playNextMusic();    
+        }
+        if (pEvent.eventType == ProgramEventType::NewDirectory)
+        {
+            openNewDirectory(pEvent.info);
+        }
     }
+    pEvents.clear();
+}
+
+void FileSubWindow::openNewDirectory(const std::string& newDir)
+{
+    mFileManager.openDirectory(newDir);
+    // std::string& getPro
 }
 
 void FileSubWindow::playNextMusic()
@@ -76,17 +89,17 @@ void FileSubWindow::playPreviousMusic()
 void FileSubWindow::playActivedMusic()
 {
     auto& musicPlayer = *getContext().musPlayer;
-    auto& programDir = getProgramDir();
     auto activeFileNamePtr = mFileManager.getActiveFileName();
+    const auto& curDir = mFileManager.getCurrentDirectory();
 
-    musicPlayer.loadMusic(programDir + '/' + *activeFileNamePtr);
+    musicPlayer.loadMusic(curDir + '/' + *activeFileNamePtr);
     musicPlayer.play();
 }
 
 void FileSubWindow::handleEvent(Event event)
 {
     auto& musicPlayer = *getContext().musPlayer;
-    auto& programDir = getProgramDir();
+    const auto& curDir = mFileManager.getCurrentDirectory();
     switch (event)
     {
         case KEY_UP:
@@ -99,7 +112,7 @@ void FileSubWindow::handleEvent(Event event)
 
         case KEY_NORMAL_ENTER:
             mFileManager.activateSelectedFile();
-            musicPlayer.loadMusic(programDir + '/' + *mFileManager.getActiveFileName());
+            musicPlayer.loadMusic(curDir + '/' + *mFileManager.getActiveFileName());
             musicPlayer.play();
             break;
         

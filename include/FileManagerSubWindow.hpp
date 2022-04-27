@@ -18,7 +18,6 @@ class FileManagerSubWindow : public SubWindow
     
     private:
         FileManager                 mFileManager;
-        std::string                 mCurrentDir;
 };  
 
 #endif

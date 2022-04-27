@@ -25,7 +25,16 @@
 class FileManager
 {
     public:
-            FileManager(const std::string& directory, int screenLinesY);
+        enum Mode
+        {
+            None,
+            MusicPlayer,
+            FilesManager,
+        };
+
+    public:
+            FileManager(const std::string& directory, int screenLinesY,
+                Mode mode);
 
         void            selectUp();
         void            selectDown();
@@ -51,13 +60,21 @@ class FileManager
 
 
         const std::string*                  getFileNameByIndx(std::size_t indx) const;
+        const std::string&                  getCurrentDirectory() const;        
 
         void                                shuffleFiles();
+
+        void                                openSelectedDirectory();
+        void                                openDirectory(const std::string& newDir);
+
+    private:
+        void                                reopenCurrentDir();
         void                                reopen(const std::string& newDir);
 
     
     
     private:
+        std::string                 mCurrentDir;
         std::vector<std::string>    mFiles;
         std::size_t                 mFirstVisibleFileIndx;
         std::size_t                 mSelectedFileIndx;
@@ -65,6 +82,8 @@ class FileManager
 
         bool                        mAnyFileActive;
         std::size_t                 mActiveFileIndx;
+
+        Mode                        mMode;
 };
 
 #endif

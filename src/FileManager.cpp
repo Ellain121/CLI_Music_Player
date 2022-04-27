@@ -6,14 +6,83 @@
 
 namespace fs = std::filesystem;
 
-FileManager::FileManager(const std::string& directory, int screenSizeY)
-: mFirstVisibleFileIndx(0)
+namespace
+{
+    void oneDirUp(std::string& path)
+    {
+        for (auto itr = path.rbegin(); itr != path.rend(); ++itr)
+        {
+            if (*itr == '/') break;
+            path.pop_back();
+        }
+        path.pop_back();
+    }
+
+    void oneDirDown(std::string& path, const std::string& dirName)
+    {
+        path += '/' + dirName;
+    }
+};
+
+FileManager::FileManager(const std::string& directory, int screenSizeY
+    , FileManager::Mode mode)
+: mCurrentDir(directory)
+, mFirstVisibleFileIndx(0)
 , mSelectedFileIndx(0)
 , mScreenSizeY(screenSizeY)
 , mActiveFileIndx(0)
 , mAnyFileActive(false)
+, mMode(mode)
 {
+    if (mMode == Mode::FilesManager)
+        mFiles.push_back("..");
+
     for (const auto& entry : fs::directory_iterator(directory))
+    {
+        mFiles.push_back(entry.path().filename().string());
+        // mFiles.push_back(entry.path().string());
+    }
+}
+
+void FileManager::openSelectedDirectory()
+{
+    const std::string& selected = mFiles[mSelectedFileIndx];
+    if (selected == "..")
+    {
+        oneDirUp(mCurrentDir);
+    }
+    else
+    {
+        std::string newDir = mCurrentDir;
+        oneDirDown(newDir, selected);
+        if (!fs::is_directory(newDir))
+        {
+            return;
+        }
+        mCurrentDir = newDir;
+    }
+    reopenCurrentDir();
+}
+
+void FileManager::openDirectory(const std::string& newDir)
+{
+    reopen(newDir);
+}
+
+void FileManager::reopenCurrentDir()
+{
+    // throw std::logic_error(mCurrentDir.c_str());
+
+    mFiles.clear();
+    mFirstVisibleFileIndx = 0;
+    mSelectedFileIndx = 0;
+    // activeFile = nullptr;
+    // activeFileIndx = 0;
+
+    if (mMode == Mode::FilesManager)
+        mFiles.push_back("..");
+
+    for (const auto& entry : fs::directory_iterator(mCurrentDir))
     {
         mFiles.push_back(entry.path().filename().string());
         // mFiles.push_back(entry.path().string());
@@ -22,18 +91,13 @@ FileManager::FileManager(const std::string& directory, int screenSizeY)
 
 void FileManager::reopen(const std::string& newDir)
 {
-    mFiles.clear();
-    mFirstVisibleFileIndx = 0;
-    mSelectedFileIndx = 0;
-    // activeFile = nullptr;
-    // activeFileIndx = 0;
+    mCurrentDir = newDir;
+    reopenCurrentDir();
+}
 
-    for (const auto& entry : fs::directory_iterator(newDir))
-    {
-        mFiles.push_back(entry.path().filename().string());
-        // mFiles.push_back(entry.path().string());
-    }
-    
+const std::string& FileManager::getCurrentDirectory() const
+{
+    return mCurrentDir;
 }
 
 const std::string* FileManager::getSelectedFileName() const

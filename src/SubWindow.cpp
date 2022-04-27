@@ -2,6 +2,13 @@
 
 #include "ncurses.h"
 
+SubWindow::ProgramEvent::ProgramEvent(ProgramEventType evType
+    , std::string evInfo)
+: eventType(evType)
+, info(evInfo)
+{
+}
+
 SubWindow::Context::Context(MusicPlayer& mPlayer, std::vector<ProgramEvent>& progEvents)
 : musPlayer(&mPlayer)
 , mProgEvents(&progEvents)
@@ -52,11 +59,6 @@ void SubWindow::deselect()
 bool SubWindow::iSSelected() const
 {
     return mSubWindowSelected;
-}
-
-const std::string& SubWindow::getProgramDir() const
-{
-    return mProgramDir;
 }
 
 const Rectangle& SubWindow::getBounds() const

@@ -15,6 +15,8 @@ class FileSubWindow : public SubWindow
         void    update();
 
     private:
+        void        openNewDirectory(const std::string& newDir);
+
         void        playNextMusic();
         void        playPreviousMusic();
         void        playActivedMusic();

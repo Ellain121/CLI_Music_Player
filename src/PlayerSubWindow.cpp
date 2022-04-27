@@ -42,14 +42,13 @@ void PlayerSubWindow::draw() const
 
 void PlayerSubWindow::update() 
 {   
-    auto& programDir = getProgramDir();
     auto& musicPlayer = *getContext().musPlayer;
     auto& progEvents = *getContext().mProgEvents;
 
     if (musicPlayer.isStreamDone())
     {
         // playNextMusic();
-        progEvents.push_back(ProgramEvent::MusicFinished);
+        progEvents.push_back(ProgramEvent(ProgramEventType::MusicFinished));
     }
 }
 

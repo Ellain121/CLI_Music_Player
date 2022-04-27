@@ -11,10 +11,19 @@ class MusicPlayer;
 class SubWindow
 {
     public:
-        enum ProgramEvent
+        enum ProgramEventType
         {
             None,
             MusicFinished,
+            NewDirectory,
+        };
+
+        struct ProgramEvent
+        {
+            ProgramEvent(ProgramEventType evType, std::string evInfo = "");
+
+            ProgramEventType    eventType;
+            std::string         info;
         };
 
         struct Context
@@ -39,7 +48,6 @@ class SubWindow
     
     protected:
         void                drawRectangle() const;
-        const std::string&  getProgramDir() const;
         const Rectangle&    getBounds() const;
         Context             getContext() const;
     
