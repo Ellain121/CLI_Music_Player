@@ -26,6 +26,8 @@ class MusicPlayer
         void    volumeDown5Percent();
 
         bool    isStreamDone();
+
+        const std::string&  getCurrentMusicName() const;
     
     private:
         float   getPreviousStreamVolume() const;
@@ -36,6 +38,7 @@ class MusicPlayer
         HSTREAM             mStream;
         bool                mFileCreated;
         bool                mMusicPlaying;
+        std::string         mCurrentMusicName;
 };
 
 #endif

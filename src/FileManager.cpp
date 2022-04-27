@@ -10,6 +10,8 @@ FileManager::FileManager(const std::string& directory, int screenSizeY)
 : mFirstVisibleFileIndx(0)
 , mSelectedFileIndx(0)
 , mScreenSizeY(screenSizeY)
+, mActiveFileIndx(0)
+, mAnyFileActive(false)
 {
     for (const auto& entry : fs::directory_iterator(directory))
     {
@@ -18,14 +20,37 @@ FileManager::FileManager(const std::string& directory, int screenSizeY)
     }
 }
 
-const std::string* FileManager::getSelectedFile() const
+void FileManager::reopen(const std::string& newDir)
+{
+    mFiles.clear();
+    mFirstVisibleFileIndx = 0;
+    mSelectedFileIndx = 0;
+    // activeFile = nullptr;
+    // activeFileIndx = 0;
+
+    for (const auto& entry : fs::directory_iterator(newDir))
+    {
+        mFiles.push_back(entry.path().filename().string());
+        // mFiles.push_back(entry.path().string());
+    }
+    
+}
+
+const std::string* FileManager::getSelectedFileName() const
 {
     if (mFiles.empty()) return nullptr;
 
     return &mFiles[mSelectedFileIndx];
 }
 
-const std::string* FileManager::getFileByIndx(std::size_t indx) const
+const std::string* FileManager::getActiveFileName() const
+{
+    if (!mAnyFileActive) return nullptr;
+
+    return &mFiles[mActiveFileIndx];
+}
+
+const std::string* FileManager::getFileNameByIndx(std::size_t indx) const
 {
     if (indx >= mFiles.size()) return nullptr;
 
@@ -42,14 +67,35 @@ std::size_t FileManager::getSelectedFileIndx() const
     return mSelectedFileIndx;
 }
 
+std::size_t FileManager::getActiveFileIndx() const
+{
+    return mActiveFileIndx;
+}
+
 std::size_t FileManager::getRelativeSelectedFileIndx() const
 {
     return mSelectedFileIndx - mFirstVisibleFileIndx;
 }
 
+int FileManager::getRelativeActiveFileIndx() const
+{
+    return mActiveFileIndx - mFirstVisibleFileIndx;
+}
+
 std::size_t FileManager::getFilesAmount() const
 {
     return mFiles.size();
+}
+
+void FileManager::activateSelectedFile()
+{
+    mAnyFileActive = true;
+    mActiveFileIndx = mSelectedFileIndx;
+}
+
+bool FileManager::isAnyFileActivated() const
+{
+    return mAnyFileActive;
 }
 
 void FileManager::selectUp()
@@ -61,6 +107,28 @@ void FileManager::selectUp()
     {
         mFirstVisibleFileIndx--;
     }
+}
+
+void FileManager::activateUp()
+{
+    if (mActiveFileIndx == 0)
+    {
+        mActiveFileIndx = mFiles.size() - 1;
+        return;
+    }
+
+    mActiveFileIndx--;
+}
+
+void FileManager::activateDown()
+{
+    if (mActiveFileIndx == mFiles.size() - 1)
+    {
+        mActiveFileIndx = 0;
+        return;
+    }
+
+    mActiveFileIndx++;
 }
 
 void FileManager::selectDown()

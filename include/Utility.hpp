@@ -7,12 +7,12 @@ typedef int Event;
 
 #define KEY_NORMAL_ENTER 10
 
-struct ProgramData
-{
-    ProgramData();
-    const std::string*  activeFile;
-    std::size_t         activeFileIndx;
-};  
+// struct ProgramData
+// {
+//     ProgramData();
+//     const std::string*  activeFile;
+//     std::size_t         activeFileIndx;
+// };  
 
 struct Rectangle
 {

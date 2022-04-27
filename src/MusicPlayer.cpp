@@ -1,9 +1,29 @@
 #include "MusicPlayer.hpp"
+
 #include <iostream>
+#include <algorithm>
+
+namespace 
+{
+    std::string extractFilenameFromPath(const std::string path)
+    {
+        std::string name;
+        for (auto itr = path.rbegin(); itr != path.rend(); ++itr)
+        {
+            if (*itr == '/') break;
+
+            name += *itr;
+        }
+
+        std::reverse(name.begin(), name.end());
+        return name;
+    }
+}
 
 MusicPlayer::MusicPlayer()
 : mFileCreated(false)
 , mMusicPlaying(false)
+, mCurrentMusicName("")
 {
     int pluginFlac = BASS_PluginLoad("/home/jonathan/Downloads/bassflac24-linux/x64/libbassflac.so", 0);
     if (pluginFlac == 0)
@@ -25,12 +45,18 @@ bool MusicPlayer::isStreamDone()
 
 void MusicPlayer::loadMusic(const std::string& path)
 {
+    mCurrentMusicName = extractFilenameFromPath(path);
     float volume = getPreviousStreamVolume();
     endStream();
     
     mFileCreated = true;
     mStream = BASS_StreamCreateFile(0, path.c_str(), 0, 0, 0);
     setVolume(volume);
+}
+
+const std::string& MusicPlayer::getCurrentMusicName() const
+{
+    return mCurrentMusicName;
 }
 
 void MusicPlayer::play()

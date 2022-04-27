@@ -1,9 +1,10 @@
 #include "SubWindow.hpp"
 
-SubWindow::Context::Context(FileManager& fManager, MusicPlayer& mPlayer, ProgramData& pData)
-: fileManager(&fManager)
-, musPlayer(&mPlayer)
-, progData(&pData)
+#include "ncurses.h"
+
+SubWindow::Context::Context(MusicPlayer& mPlayer, std::vector<ProgramEvent>& progEvents)
+: musPlayer(&mPlayer)
+, mProgEvents(&progEvents)
 {
 }
 
@@ -12,7 +13,45 @@ SubWindow::SubWindow(Context context, const std::string& programDir
 : mContext(context)
 , mProgramDir(programDir)
 , mBounds(bounds)
+, mSubWindowSelected(false)
 {
+}
+
+void SubWindow::drawRectangle() const
+{
+    int x1 = mBounds.x1;
+    int x2 = mBounds.x2;
+    int y1 = mBounds.y1;
+    int y2 = mBounds.y2;
+
+    if (mSubWindowSelected)
+        attron(COLOR_PAIR(1));
+
+    mvhline(y1, x1, 0, x2 - x1);
+    mvhline(y2, x1, 0, x2 - x1);
+    mvvline(y1, x1, 0, y2 - y1);
+    mvvline(y1, x2, 0, y2 - y1);
+    mvaddch(y1, x1, ACS_ULCORNER);
+    mvaddch(y2, x1, ACS_LLCORNER);
+    mvaddch(y1, x2, ACS_URCORNER);
+    mvaddch(y2, x2, ACS_LRCORNER);
+
+    attroff(COLOR_PAIR(1));
+}
+
+void SubWindow::select()
+{
+    mSubWindowSelected = true;
+}
+
+void SubWindow::deselect()
+{
+    mSubWindowSelected = false;
+}
+
+bool SubWindow::iSSelected() const
+{
+    return mSubWindowSelected;
 }
 
 const std::string& SubWindow::getProgramDir() const

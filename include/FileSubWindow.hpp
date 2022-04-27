@@ -2,6 +2,7 @@
 #define FILESUBWINDOW_HPP
 
 #include "SubWindow.hpp"
+#include "FileManager.hpp"
 
 class FileSubWindow : public SubWindow
 {
@@ -12,8 +13,14 @@ class FileSubWindow : public SubWindow
         void    draw() const;
         void    handleEvent(Event event);
         void    update();
+
+    private:
+        void        playNextMusic();
+        void        playPreviousMusic();
+        void        playActivedMusic();
     
     private:
+        FileManager     mFileManager;
         
 };
 

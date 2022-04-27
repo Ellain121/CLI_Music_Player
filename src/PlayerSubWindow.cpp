@@ -17,19 +17,20 @@ void PlayerSubWindow::draw() const
 {
     auto& bounds = getBounds();
     auto& musicPlayer = *getContext().musPlayer;
-    auto* activeFilePtr = getContext().progData->activeFile;
 
-    draw_rectangle(bounds);
+    auto& musicName = musicPlayer.getCurrentMusicName();
+
+    drawRectangle();
     int x = bounds.x1 + 5;
     int y = bounds.y1 + 1;
 
-    if (activeFilePtr)
+    if (!musicName.empty())
     {
         TimeInMinutes prgrs(musicPlayer.getProgressSeconds());
         TimeInMinutes dur(musicPlayer.getSongDuration());
 
-        int diffX = std::min(bounds.x2 - 21, (int)activeFilePtr->size()) + 2;
-        print_in_boundaries(y, x, *activeFilePtr, bounds.x2 - 21);
+        int diffX = std::min(bounds.x2 - 21, (int)musicName.size()) + 2;
+        print_in_boundaries(y, x, musicName, bounds.x2 - 21);
         mvprintw(y, x + diffX, "(%02d:%02d/%d:%02d)",
             prgrs.min, prgrs.sec, dur.min, dur.sec);
         std::string str = mProgressBar.getProgressBar(musicPlayer.getProgressPercent());
@@ -43,38 +44,20 @@ void PlayerSubWindow::update()
 {   
     auto& programDir = getProgramDir();
     auto& musicPlayer = *getContext().musPlayer;
+    auto& progEvents = *getContext().mProgEvents;
 
     if (musicPlayer.isStreamDone())
     {
-        playNextMusic();
+        // playNextMusic();
+        progEvents.push_back(ProgramEvent::MusicFinished);
     }
 }
 
 void PlayerSubWindow::handleEvent(Event event)
 {
-    auto& fileManager = *getContext().fileManager;
     auto& musicPlayer = *getContext().musPlayer;
-    auto& programDir = getProgramDir();
-    const std::string*& activeFilePtr = getContext().progData->activeFile;
-    std::size_t& activeFileIndx = getContext().progData->activeFileIndx;
-
     switch (event)
     {
-        case KEY_NORMAL_ENTER:
-            activeFilePtr = fileManager.getSelectedFile();
-            activeFileIndx = fileManager.getSelectedFileIndx();
-            musicPlayer.loadMusic(programDir + '/' + *fileManager.getSelectedFile());
-            musicPlayer.play();
-            break;
-
-        case 'p':
-            playPreviousMusic();
-            break;
-
-        case 'n':
-            playNextMusic();
-            break;
-
         case '=':
             musicPlayer.volumeUp5Percent();
             break;
@@ -94,62 +77,5 @@ void PlayerSubWindow::handleEvent(Event event)
         case ' ':
             musicPlayer.toggle();
             break;
-
-        case 's':
-            fileManager.shuffleFiles();
-            break;
     }
-}
-
-void PlayerSubWindow::playNextMusic()
-{
-    selectNextMusic();
-    playSelectedMusic();
-}
-
-void PlayerSubWindow::playPreviousMusic()
-{
-    selectPreviousMusic();
-    playSelectedMusic();
-}
-
-void PlayerSubWindow::playSelectedMusic()
-{
-    auto& musicPlayer = *getContext().musPlayer;
-    auto* activeFilePtr = getContext().progData->activeFile;
-    auto& programDir = getProgramDir();
-
-    musicPlayer.loadMusic(programDir + '/' + *activeFilePtr);
-    musicPlayer.play();
-}
-
-void PlayerSubWindow::selectPreviousMusic()
-{
-    auto& fileManager = *getContext().fileManager;
-    const std::string*& activeFilePtr = getContext().progData->activeFile;
-    std::size_t& activeFileIndx = getContext().progData->activeFileIndx;
-
-    if (activeFileIndx == 0)
-    {
-        activeFileIndx = fileManager.getFilesAmount() - 1;
-    }
-    else
-    {
-        activeFileIndx--;
-    }
-    activeFilePtr = fileManager.getFileByIndx(activeFileIndx);
-}
-
-void PlayerSubWindow::selectNextMusic()
-{
-    auto& fileManager = *getContext().fileManager;
-    const std::string*& activeFilePtr = getContext().progData->activeFile;
-    std::size_t& activeFileIndx = getContext().progData->activeFileIndx;
-
-    activeFileIndx++;
-    if (activeFileIndx >= fileManager.getFilesAmount())
-    {
-        activeFileIndx = 0;
-    }
-    activeFilePtr = fileManager.getFileByIndx(activeFileIndx);
 }

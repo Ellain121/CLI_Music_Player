@@ -2,12 +2,6 @@
 
 #include "ncurses.h"
 
-ProgramData::ProgramData()
-: activeFile(nullptr)
-, activeFileIndx(0)
-{
-}
-
 Rectangle::Rectangle()
 : x1(0), x2(0), y1(0), y2(0)
 {
@@ -60,6 +54,7 @@ void draw_rectangle(const Rectangle& rec)
     int x2 = rec.x2;
     int y1 = rec.y1;
     int y2 = rec.y2;
+    attron(COLOR_PAIR(1));
     mvhline(y1, x1, 0, x2 - x1);
     mvhline(y2, x1, 0, x2 - x1);
     mvvline(y1, x1, 0, y2 - y1);
@@ -68,17 +63,18 @@ void draw_rectangle(const Rectangle& rec)
     mvaddch(y2, x1, ACS_LLCORNER);
     mvaddch(y1, x2, ACS_URCORNER);
     mvaddch(y2, x2, ACS_LRCORNER);
+    attroff(COLOR_PAIR(1));
 }
 
 void print_in_boundaries(int y, int x, const std::string& fileName, int boundary)
 {
     if (fileName.size() > boundary)
     {
-        for (int i = 0; i < boundary - 3; ++i)  
+        for (int i = 0; i < boundary - 2; ++i)  
         {
             mvprintw(y, x + i, "%c", fileName[i]);
         }
-        mvprintw(y, x + boundary - 3, "...");
+        mvprintw(y, x + boundary - 2, "..");
     }
     else
     {

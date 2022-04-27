@@ -8,41 +8,64 @@ Window::Window(const std::string& programDir)
 : mPlayerScreenBoundaries(1, COLS - 2, 1, 6)
 , mFileScreenBoundaries(1, COLS / 2, 7, LINES - 2)
 , mHelpScreenBoundaries(COLS / 2 + 2, COLS - 2, 7, LINES - 2)
-, mPlayerSWindow(SubWindow::Context(mFileManager, mMusicPlayer, mProgData)
+, mProgramEvents()
+, mPlayerSWindow(SubWindow::Context(mMusicPlayer, mProgramEvents)
     , programDir, mPlayerScreenBoundaries)
-, mFileSWindow(SubWindow::Context(mFileManager, mMusicPlayer, mProgData)
+, mFileSWindow(SubWindow::Context(mMusicPlayer, mProgramEvents)
     , programDir, mFileScreenBoundaries)
-, mFileManager(programDir, mFileScreenBoundaries.getSizeY())
+, mFileManSWindow(SubWindow::Context(mMusicPlayer, mProgramEvents)
+    , programDir, mHelpScreenBoundaries)
+// , mFileManager(programDir, mFileScreenBoundaries.getSizeY())
 , mProgramDir(programDir)
-, mProgData()
+// , mProgData()
 , mHideHelpInfo(false)
 {
     buildHelpInfo();
+    mFileSWindow.select();
 }
 
 void Window::handleEvent(Event event)
 {
-    if (event == 'h')
+    switch (event)
     {
-        mHideHelpInfo = !mHideHelpInfo;
-    }
-    if (event == 'i')
-    {
-        // TODO
-    }
-    if (event == 'f')
-    {
-        // TODO
+        case '1':
+            mFileManSWindow.deselect();
+            mFileSWindow.select();
+        break;
+
+        case '2':
+            mFileManSWindow.select();
+            mFileSWindow.deselect();
+        break;
+
+        case 'h':
+            mHideHelpInfo = !mHideHelpInfo;
+        break;
+
+        case 'i':
+            // TODO
+        break;
+
+        case 'f':
+            // TODO
+        break;
     }
 
     mPlayerSWindow.handleEvent(event);
-    mFileSWindow.handleEvent(event);
+
+    if (mFileSWindow.iSSelected())
+        mFileSWindow.handleEvent(event);
+        
+    if (mFileManSWindow.iSSelected())    
+        mFileManSWindow.handleEvent(event);        
+
 }
 
 void Window::update()
 {
     mPlayerSWindow.update();
     mFileSWindow.update();
+    mFileManSWindow.update();
 }
 
 void Window::draw() const
@@ -51,7 +74,8 @@ void Window::draw() const
 
     mPlayerSWindow.draw();
     mFileSWindow.draw();
-    drawHelpScreen();
+    mFileManSWindow.draw();
+    // drawHelpScreen();
 
     refresh();
 }

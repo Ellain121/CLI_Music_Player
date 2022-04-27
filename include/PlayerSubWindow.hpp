@@ -16,15 +16,6 @@ class PlayerSubWindow : public SubWindow
     void    draw() const;
     void    handleEvent(Event event);
     void    update();
-
-    private:
-        void    playNextMusic();
-        void    playPreviousMusic();
-
-        void    selectNextMusic();
-        void    selectPreviousMusic();
-
-        void    playSelectedMusic();
     
     private:
         ProgressBar         mProgressBar;

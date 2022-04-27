@@ -6,6 +6,7 @@
 #include "MusicPlayer.hpp"
 #include "PlayerSubWindow.hpp"
 #include "FileSubWindow.hpp"
+#include "FileManagerSubWindow.hpp"
 
 #include <vector>
 #include <string>
@@ -29,14 +30,16 @@ class Window
         const Rectangle     mFileScreenBoundaries;
         const Rectangle     mHelpScreenBoundaries;
 
-        PlayerSubWindow     mPlayerSWindow;
-        FileSubWindow       mFileSWindow;
+        std::vector<SubWindow::ProgramEvent>    mProgramEvents;
+        PlayerSubWindow         mPlayerSWindow;
+        FileSubWindow           mFileSWindow;
+        FileManagerSubWindow    mFileManSWindow;
 
-        FileManager         mFileManager;
-        MusicPlayer         mMusicPlayer;
-        ProgramData         mProgData;
+        // FileManager         mFileManager;
+        MusicPlayer             mMusicPlayer;
+        // ProgramData         mProgData;
 
-        const std::string&  mProgramDir;
+        const std::string&          mProgramDir;
         std::vector<std::string>    mHelpInfo;
         bool                        mHideHelpInfo;
 
