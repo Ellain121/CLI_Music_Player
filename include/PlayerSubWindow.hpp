@@ -14,6 +14,7 @@ class PlayerSubWindow : public SubWindow
                     , const Rectangle& bounds);
 
     void    draw() const;
+    void    drawHelpMenu() const;
     void    handleEvent(Event event);
     void    update();
     

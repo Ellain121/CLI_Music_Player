@@ -16,6 +16,7 @@ class SubWindow
             None,
             MusicFinished,
             NewDirectory,
+            ReloadFileManagerFiles,
         };
 
         struct ProgramEvent
@@ -38,9 +39,10 @@ class SubWindow
         SubWindow(Context context, const std::string& programDir
                     , const Rectangle& bounds);
 
+        virtual void    drawHelpMenu() const = 0;
         virtual void    draw() const = 0;
         virtual void    handleEvent(Event event) = 0;
-        virtual void    update() = 0;
+        virtual void    update();
 
         virtual void    select();
         virtual void    deselect();
@@ -56,6 +58,9 @@ class SubWindow
         const Rectangle     mBounds;
         Context             mContext;
         bool                mSubWindowSelected;
+    
+    protected:
+        bool                mHelpMenuMode;
 };
 
 #endif

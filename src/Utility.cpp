@@ -1,6 +1,9 @@
 #include "Utility.hpp"
 
 #include "ncurses.h"
+#include "FileManager.hpp"
+
+#include <algorithm>
 
 Rectangle::Rectangle()
 : x1(0), x2(0), y1(0), y2(0)
@@ -134,4 +137,133 @@ bool yes_no_window(const std::string& text)
     }
 
     return true;
+}
+
+std::size_t choose_option_window(std::vector<std::string>& options)
+{
+    options.push_back("create new playlist");
+    clear();
+    int sizeX = COLS / 2; 
+    int sizeY = std::min((int)options.size() + 3, COLS - 2);
+    int offX = COLS / 4;
+    int offY = LINES / 4;
+
+    draw_rectangle(Rectangle(offX, offX + sizeX, offY, offY + sizeY));
+
+    int selectedIndx = 0;
+
+    std::function<void()> drawOptions = [&]{
+        std::string msg = "Choose option: ";
+        mvprintw(offY, offX + (sizeX - msg.size()) / 2, msg.c_str());
+        for (int i = 0; i < options.size(); ++i)
+        {
+            const std::string& option = options[i];
+
+            int x = offX + 3;
+            int y = offY + 2 + i;
+
+            if (i == selectedIndx)
+            {
+                attron(A_REVERSE);
+                mvprintw(y, x, option.c_str());
+                attroff(A_REVERSE);
+            }
+            else
+            {
+                mvprintw(y, x, option.c_str());
+            }
+        };
+    };
+    drawOptions();
+
+    int ch;
+    while (true)
+    {
+        int ch = getch();
+
+        if (ch == KEY_DOWN) selectedIndx = selectedIndx + 1 < options.size() ? selectedIndx + 1 : 0;
+        if (ch == KEY_UP) selectedIndx = selectedIndx - 1 >= 0 ? selectedIndx - 1 : options.size() - 1;
+        if (ch == KEY_NORMAL_ENTER)
+        {
+            if (options[selectedIndx] == "create new playlist")
+            {
+                auto res = create_new_playlist_window();
+                if (res.second == true)
+                {
+                    options[selectedIndx] = res.first;
+                    return selectedIndx;
+                }
+                else
+                {
+                    draw_rectangle(Rectangle(offX, offX + sizeX, offY, offY + sizeY));
+                }
+            }
+            else
+            {
+                return selectedIndx;
+            }
+        }
+
+        drawOptions();
+
+        refresh();
+    }
+
+    return 0; 
+}
+
+// return value pair (1) - playlist name;  (2) - if successfull, if not, then don't use (1)
+std::pair<std::string, bool> create_new_playlist_window()
+{
+    int sizeX = COLS / 2; 
+    int sizeY = LINES / 2;
+    int offX = COLS / 4;
+    int offY = LINES / 4;
+    curs_set(1);
+
+    std::string text = "";
+    auto draw_func = [&]{
+        clear();
+        draw_rectangle(Rectangle(offX, offX + sizeX, offY, offY + sizeY));
+        std::string msg = "write playlist name";
+        mvprintw(offY, offX + sizeX/2 - msg.size() / 2, msg.c_str());
+
+        mvprintw(offY + 3, offX + 2, ": ");
+        mvprintw(offY + 3, offX + 4, text.c_str());
+        refresh();
+    };
+
+    int ch;
+    while (true)
+    {
+        draw_func();
+        int ch = getch();
+        if (ch == KEY_NORMAL_ENTER)
+        {
+            break;
+        }
+        if (ch == KEY_BACKSPACE && !text.empty())
+        {
+            text.pop_back();
+        }
+
+        if (!isprint(ch)) continue;
+
+        text += ch;
+
+    }
+
+    curs_set(0);
+    clear();
+    if (!text.empty())
+    {
+        std::string folderPath = std::string(FAV_DIR) + text;
+        FileManager::createFolder(folderPath);
+        
+        return std::make_pair(text, true);
+    }
+    else
+    {
+        return std::make_pair(text, false);
+    }
 }

@@ -4,9 +4,11 @@
 
 #include <filesystem>
 
+
 void start_ncurses()
 {
     initscr();
+    noecho();
     raw();
     start_color();
     curs_set(0);

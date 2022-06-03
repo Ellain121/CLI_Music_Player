@@ -29,14 +29,21 @@ void Window::handleEvent(Event event)
     switch (event)
     {
         case '1':
+            mPlayerSWindow.select();
+            mFileSWindow.deselect();
             mFileManSWindow.deselect();
-            mFileSWindow.select();
         break;
 
         case '2':
-            mFileManSWindow.select();
-            mFileSWindow.deselect();
+            mPlayerSWindow.deselect();
+            mFileSWindow.select();
+            mFileManSWindow.deselect();
         break;
+
+        case '3':
+            mPlayerSWindow.deselect();
+            mFileSWindow.deselect();
+            mFileManSWindow.select();
 
         case 'h':
             mHideHelpInfo = !mHideHelpInfo;

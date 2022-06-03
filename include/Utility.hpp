@@ -2,6 +2,7 @@
 #define UTILITY_HPP
 
 #include <string>
+#include <vector>
 
 typedef int Event;
 
@@ -13,6 +14,8 @@ typedef int Event;
 //     const std::string*  activeFile;
 //     std::size_t         activeFileIndx;
 // };  
+
+const std::string FAV_DIR = "/home/jonathan/ApplicationData/CLI_Music_Player/";
 
 struct Rectangle
 {
@@ -45,6 +48,8 @@ struct ProgressBar
 void draw_rectangle(const Rectangle& rec);
 void print_in_boundaries(int y, int x, const std::string& fileName, int boundary);
 
-bool yes_no_window(const std::string& text);
+bool                            yes_no_window(const std::string& text);
+std::size_t                     choose_option_window(std::vector<std::string>& options);
+std::pair<std::string, bool>    create_new_playlist_window();
 
 #endif

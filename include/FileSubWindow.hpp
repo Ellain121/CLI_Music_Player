@@ -11,6 +11,7 @@ class FileSubWindow : public SubWindow
                     , const Rectangle& bounds);
 
         void    draw() const;
+        void    drawHelpMenu() const;
         void    handleEvent(Event event);
         void    update();
 
@@ -20,6 +21,8 @@ class FileSubWindow : public SubWindow
         void        playNextMusic();
         void        playPreviousMusic();
         void        playActivedMusic();
+
+        void        addToFavorites();
     
     private:
         FileManager     mFileManager;
