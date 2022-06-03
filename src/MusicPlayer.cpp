@@ -179,3 +179,17 @@ void MusicPlayer::endStream()
         mFileCreated = false;
     }
 }
+
+bool MusicPlayer::isFilePlayable(const std::string& path)
+{
+    int pluginFlac = BASS_PluginLoad("/home/jonathan/Downloads/bassflac24-linux/x64/libbassflac.so", 0);
+    if (pluginFlac == 0)
+    {
+        throw std::logic_error(std::to_string(pluginFlac));
+    }
+    BASS_Init(-1, 44100, BASS_DEVICE_3D, 0, 0);
+
+    HSTREAM stream = BASS_StreamCreateFile(0, path.c_str(), 0, 0, 0);
+
+    return stream != 0;
+}

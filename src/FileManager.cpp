@@ -1,8 +1,12 @@
 #include "FileManager.hpp"
+#include "MusicPlayer.hpp"
+#include "Utility.hpp"
 
 #include <filesystem>
 #include <algorithm>
 #include <random>
+#include <cassert>
+#include "unistd.h"
 
 namespace fs = std::filesystem;
 
@@ -34,14 +38,7 @@ FileManager::FileManager(const std::string& directory, int screenSizeY
 , mAnyFileActive(false)
 , mMode(mode)
 {
-    if (mMode == Mode::FilesManager)
-        mFiles.push_back("..");
-
-    for (const auto& entry : fs::directory_iterator(directory))
-    {
-        mFiles.push_back(entry.path().filename().string());
-        // mFiles.push_back(entry.path().string());
-    }
+    reopenCurrentDir();
 }
 
 void FileManager::openSelectedDirectory()
@@ -64,6 +61,11 @@ void FileManager::openSelectedDirectory()
     reopenCurrentDir();
 }
 
+void FileManager::reloadCurrentDirectory()
+{
+    openDirectory(mCurrentDir);
+}
+
 void FileManager::openDirectory(const std::string& newDir)
 {
     reopen(newDir);
@@ -80,12 +82,22 @@ void FileManager::reopenCurrentDir()
     // activeFileIndx = 0;
 
     if (mMode == Mode::FilesManager)
+    {
         mFiles.push_back("..");
 
-    for (const auto& entry : fs::directory_iterator(mCurrentDir))
+        for (const auto& entry : fs::directory_iterator(mCurrentDir))
+        {
+            mFiles.push_back(entry.path().filename().string());
+            // mFiles.push_back(entry.path().string());
+        }
+    }
+    else
     {
-        mFiles.push_back(entry.path().filename().string());
-        // mFiles.push_back(entry.path().string());
+        for (const auto& entry : fs::directory_iterator(mCurrentDir))
+        {
+            if (MusicPlayer::isFilePlayable(entry.path()))
+                mFiles.push_back(entry.path().filename().string());
+        }
     }
 }
 
@@ -227,4 +239,44 @@ std::vector<const std::string*> FileManager::getVisibleFiles() const
     }
 
     return visibleFiles;
+}
+
+bool FileManager::isDirectoryExists(const std::string& dir)
+{
+    return fs::is_directory(dir);
+}
+
+void FileManager::createFolder(const std::string& folderPath)
+{
+    fs::create_directory(folderPath);
+}
+
+std::string FileManager::getFavDirLocation()
+{
+    return FAV_DIR;
+}
+
+std::vector<std::string> FileManager::getFavDirs()
+{
+    std::vector<std::string> res;
+    for (const auto& entry : fs::directory_iterator(FAV_DIR))
+    {
+        res.push_back(entry.path().filename().string());
+    }
+    
+    return res;
+}
+
+void FileManager::createHardLink(const std::string& old_path, const std::string& new_path)
+{
+    int status = link(old_path.c_str(), new_path.c_str());
+    assert(status == 0);
+}
+
+void FileManager::deleteAnyFile(const std::string& filePath)
+{
+    if (fs::is_directory(filePath))
+        fs::remove_all(filePath);
+    else
+        fs::remove(filePath);
 }

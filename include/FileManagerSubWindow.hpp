@@ -13,11 +13,15 @@ class FileManagerSubWindow : public SubWindow
                 const Rectangle& bounds);
     
         void    draw() const;
+        void    drawHelpMenu() const;
         void    handleEvent(Event event);
         void    update();
     
     private:
         FileManager                 mFileManager;
+
+        bool                        mInPlaylistDir;
+        std::string                 mDirBeforePlaylistDir;
 };  
 
 #endif

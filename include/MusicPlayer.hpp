@@ -28,6 +28,7 @@ class MusicPlayer
         bool    isStreamDone();
 
         const std::string&  getCurrentMusicName() const;
+        static bool         isFilePlayable(const std::string& path);
     
     private:
         float   getPreviousStreamVolume() const;

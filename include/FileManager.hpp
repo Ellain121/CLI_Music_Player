@@ -66,6 +66,15 @@ class FileManager
 
         void                                openSelectedDirectory();
         void                                openDirectory(const std::string& newDir);
+        void                                reloadCurrentDirectory();
+
+        static bool                         isDirectoryExists(const std::string& dir);   
+        static void                         createFolder(const std::string& folderPath);
+        static std::string                  getFavDirLocation();
+        static std::vector<std::string>     getFavDirs();
+        static void                         createHardLink(const std::string& old_path, const std::string& new_path);
+        static void                         deleteAnyFile(const std::string& filePath);
+
 
     private:
         void                                reopenCurrentDir();

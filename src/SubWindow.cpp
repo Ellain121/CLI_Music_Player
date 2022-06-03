@@ -21,6 +21,7 @@ SubWindow::SubWindow(Context context, const std::string& programDir
 , mProgramDir(programDir)
 , mBounds(bounds)
 , mSubWindowSelected(false)
+, mHelpMenuMode(false)
 {
 }
 
@@ -44,6 +45,14 @@ void SubWindow::drawRectangle() const
     mvaddch(y2, x2, ACS_LRCORNER);
 
     attroff(COLOR_PAIR(1));
+}
+
+void SubWindow::update()
+{
+    if (!iSSelected() && mHelpMenuMode)
+    {
+        mHelpMenuMode = false;
+    }
 }
 
 void SubWindow::select()

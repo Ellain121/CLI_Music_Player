@@ -11,63 +11,97 @@ FileSubWindow::FileSubWindow(Context context, const std::string& programDir
 {
 }
 
-void FileSubWindow::draw() const
+
+void FileSubWindow::drawHelpMenu() const
 {
     auto& bounds = getBounds();
 
-    drawRectangle();
     auto visibleFiles = mFileManager.getVisibleFiles();
 
     int y = bounds.y1 + 1;
     int x = bounds.x1 + 2;
 
-    std::size_t relativeSelectedIndx = mFileManager.getRelativeSelectedFileIndx();
-    std::size_t playerFileRelativeIndx = mFileManager.getRelativeActiveFileIndx();
+    mvprintw(y + 0, x, "(key_up) - select up");
+    mvprintw(y + 1, x, "(key_down) - select down");
+    mvprintw(y + 2, x, "(enter) - play selected");
+    mvprintw(y + 3, x, "(s) - shuffle");
+    mvprintw(y + 4, x, "(p) - play previous music");
+    mvprintw(y + 5, x, "(n) - play next music");
+    mvprintw(y + 6, x, "(f) - add to favorites");
+    mvprintw(y + 7, x, "(h) - toggle help menu");
+}
 
-    for (size_t i = 0; i < visibleFiles.size(); ++i)
+void FileSubWindow::draw() const
+{
+    drawRectangle();
+
+    if (mHelpMenuMode)
     {
-        if (i == relativeSelectedIndx && iSSelected())
-        {
-            attron(A_REVERSE);
-        }
-        if (i == playerFileRelativeIndx)
-        {
-            attron(COLOR_PAIR(1));
-        }
-
-        print_in_boundaries(y, x, *visibleFiles[i], bounds.x2 - 4);
-        attroff(A_REVERSE | COLOR_PAIR(1));
-        y++;
+        drawHelpMenu();
     }
-    size_t selectedFileIndx = mFileManager.getSelectedFileIndx();
-    size_t filesAmount = mFileManager.getFilesAmount();
-    int tempX = bounds.x2 - 10;
-    int tempY = bounds.y2;
-    mvprintw(tempY, tempX, "%d/%d", selectedFileIndx + 1, filesAmount);
+    else
+    {
+        auto& bounds = getBounds();
+
+        auto visibleFiles = mFileManager.getVisibleFiles();
+
+        int y = bounds.y1 + 1;
+        int x = bounds.x1 + 2;
+
+        std::size_t relativeSelectedIndx = mFileManager.getRelativeSelectedFileIndx();
+        std::size_t playerFileRelativeIndx = mFileManager.getRelativeActiveFileIndx();
+
+        for (size_t i = 0; i < visibleFiles.size(); ++i)
+        {
+            if (i == relativeSelectedIndx && iSSelected())
+            {
+                attron(A_REVERSE);
+            }
+            if (i == playerFileRelativeIndx)
+            {
+                attron(COLOR_PAIR(1));
+            }
+
+            print_in_boundaries(y, x, *visibleFiles[i], bounds.x2 - 4);
+            attroff(A_REVERSE | COLOR_PAIR(1));
+            y++;
+        }
+        size_t selectedFileIndx = mFileManager.getSelectedFileIndx();
+        size_t filesAmount = mFileManager.getFilesAmount();
+        int tempX = bounds.x2 - 10;
+        int tempY = bounds.y2;
+        mvprintw(tempY, tempX, "%d/%d", selectedFileIndx + 1, filesAmount);
+    }
 }
 
 void FileSubWindow::update()
 {
+    SubWindow::update();
+
     auto& pEvents = *getContext().mProgEvents;
 
-    for (auto& pEvent : pEvents)
+    // for (auto& pEvent : pEvents)
+    for (int i = 0; i < pEvents.size(); ++i)
     {
+        auto& pEvent = pEvents[i];
         if (pEvent.eventType == ProgramEventType::MusicFinished)
         {
             playNextMusic();    
+            pEvents.erase(pEvents.begin() + i);
+            i--;
         }
         if (pEvent.eventType == ProgramEventType::NewDirectory)
         {
             openNewDirectory(pEvent.info);
+            pEvents.erase(pEvents.begin() + i);
+            i--;
         }
     }
-    pEvents.clear();
 }
 
 void FileSubWindow::openNewDirectory(const std::string& newDir)
 {
     mFileManager.openDirectory(newDir);
-    // std::string& getPro
 }
 
 void FileSubWindow::playNextMusic()
@@ -94,6 +128,25 @@ void FileSubWindow::playActivedMusic()
 
     musicPlayer.loadMusic(curDir + '/' + *activeFileNamePtr);
     musicPlayer.play();
+}
+
+void FileSubWindow::addToFavorites()
+{
+    auto favs = FileManager::getFavDirs();
+
+    int answer = choose_option_window(favs);
+    
+    if (answer != -1)
+    {
+        auto activeFileNamePtr = mFileManager.getActiveFileName();
+        const auto& curDir = mFileManager.getCurrentDirectory();
+
+        std::string old_path = curDir + '/' + *activeFileNamePtr;
+        std::string new_path = FileManager::getFavDirLocation() + '/' + favs[answer] + '/' + *activeFileNamePtr;
+
+        FileManager::createHardLink(old_path, new_path);
+    }
+        
 }
 
 void FileSubWindow::handleEvent(Event event)
@@ -126,6 +179,18 @@ void FileSubWindow::handleEvent(Event event)
 
         case 'n':
             playNextMusic();
+            break;
+
+        case 'f':
+        {
+            addToFavorites();
+            auto& progEvents = *getContext().mProgEvents;
+            progEvents.push_back(SubWindow::ProgramEventType::ReloadFileManagerFiles);
+
+            break;
+        }
+        case 'h':
+            mHelpMenuMode = !mHelpMenuMode;
             break;
     }
 }
