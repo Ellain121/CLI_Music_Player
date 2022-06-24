@@ -17,6 +17,8 @@ class FileSubWindow : public SubWindow
 
     private:
         void        openNewDirectory(const std::string& newDir);
+        void        openNewDirectoryAll(const std::string& newDir);
+        void        openNewDirectoryAllAppend(const std::string& newDir);
 
         void        playNextMusic();
         void        playPreviousMusic();

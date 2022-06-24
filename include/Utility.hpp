@@ -48,6 +48,7 @@ struct ProgressBar
 void draw_rectangle(const Rectangle& rec);
 void print_in_boundaries(int y, int x, const std::string& fileName, int boundary);
 
+void                            writeToDebug(const std::string& msg);
 bool                            yes_no_window(const std::string& text);
 std::size_t                     choose_option_window(std::vector<std::string>& options);
 std::pair<std::string, bool>    create_new_playlist_window();

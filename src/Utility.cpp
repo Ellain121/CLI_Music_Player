@@ -4,6 +4,7 @@
 #include "FileManager.hpp"
 
 #include <algorithm>
+#include <fstream>
 
 Rectangle::Rectangle()
 : x1(0), x2(0), y1(0), y2(0)
@@ -83,6 +84,19 @@ void print_in_boundaries(int y, int x, const std::string& fileName, int boundary
     {
         mvprintw(y, x, fileName.c_str());
     }
+}
+
+void writeToDebug(const std::string& msg)
+{
+    std::ofstream file;
+    // HPP
+    file.open("../debug.txt", std::ios::app);
+    if (msg.empty())
+    {
+        file << "EMPTY LINE" << std::endl;
+    }
+    file << msg << std::endl;
+    file.close();
 }
 
 bool yes_no_window(const std::string& text)

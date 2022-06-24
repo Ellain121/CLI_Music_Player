@@ -28,6 +28,12 @@ namespace
     }
 };
 
+FileManager::DirEntry::DirEntry(const std::string& path, const std::string& name)
+: path(path)
+, name(name)
+{
+}
+
 FileManager::FileManager(const std::string& directory, int screenSizeY
     , FileManager::Mode mode)
 : mCurrentDir(directory)
@@ -43,7 +49,7 @@ FileManager::FileManager(const std::string& directory, int screenSizeY
 
 void FileManager::openSelectedDirectory()
 {
-    const std::string& selected = mFiles[mSelectedFileIndx];
+    const std::string& selected = mFiles[mSelectedFileIndx].name;
     if (selected == "..")
     {
         oneDirUp(mCurrentDir);
@@ -71,6 +77,37 @@ void FileManager::openDirectory(const std::string& newDir)
     reopen(newDir);
 }
 
+void FileManager::openDirectoryAll(const std::string& newDir)
+{
+    mFiles.clear();
+    mFirstVisibleFileIndx = 0;
+    mSelectedFileIndx = 0;
+    if (mMode == Mode::MusicPlayer)
+    {
+        mCurrentDir = newDir;
+        for (const auto& entry : fs::recursive_directory_iterator(newDir))
+        {
+            if (MusicPlayer::isFilePlayable(entry.path()))
+                mFiles.push_back(DirEntry(entry.path(), entry.path().filename().string()));
+        }
+    }
+}
+
+void FileManager::openDirectoryAllAppend(const std::string& newDir)
+{
+    if (mCurrentDir == newDir) return;
+    
+    if (mMode == Mode::MusicPlayer)
+    {
+        mCurrentDir = newDir;
+        for (const auto& entry : fs::recursive_directory_iterator(newDir))
+        {
+            if (MusicPlayer::isFilePlayable(entry.path()))
+                mFiles.push_back(DirEntry(entry.path(), entry.path().filename().string()));
+        }
+    }
+}
+
 void FileManager::reopenCurrentDir()
 {
     // throw std::logic_error(mCurrentDir.c_str());
@@ -83,11 +120,11 @@ void FileManager::reopenCurrentDir()
 
     if (mMode == Mode::FilesManager)
     {
-        mFiles.push_back("..");
+        mFiles.push_back(DirEntry("", ".."));
 
         for (const auto& entry : fs::directory_iterator(mCurrentDir))
         {
-            mFiles.push_back(entry.path().filename().string());
+            mFiles.push_back(DirEntry(entry.path(), entry.path().filename().string()));
             // mFiles.push_back(entry.path().string());
         }
     }
@@ -96,7 +133,8 @@ void FileManager::reopenCurrentDir()
         for (const auto& entry : fs::directory_iterator(mCurrentDir))
         {
             if (MusicPlayer::isFilePlayable(entry.path()))
-                mFiles.push_back(entry.path().filename().string());
+                mFiles.push_back(DirEntry(entry.path(), entry.path().filename().string()));
+                // mFiles.push_back(entry.path().filename().string());
         }
     }
 }
@@ -116,21 +154,28 @@ const std::string* FileManager::getSelectedFileName() const
 {
     if (mFiles.empty()) return nullptr;
 
-    return &mFiles[mSelectedFileIndx];
+    return &mFiles[mSelectedFileIndx].name;
 }
 
 const std::string* FileManager::getActiveFileName() const
 {
     if (!mAnyFileActive) return nullptr;
 
-    return &mFiles[mActiveFileIndx];
+    return &mFiles[mActiveFileIndx].name;
+}
+
+const std::string* FileManager::getActiveFilePath() const
+{
+    if (!mAnyFileActive) return nullptr;
+
+    return &mFiles[mActiveFileIndx].path;
 }
 
 const std::string* FileManager::getFileNameByIndx(std::size_t indx) const
 {
     if (indx >= mFiles.size()) return nullptr;
 
-    return &mFiles[indx];
+    return &mFiles[indx].name;
 }
 
 std::size_t FileManager::getFirstVisibleFileIndx() const
@@ -235,7 +280,7 @@ std::vector<const std::string*> FileManager::getVisibleFiles() const
     int endBound = std::min(mFirstVisibleFileIndx + mScreenSizeY - 1, mFiles.size());
     for (int i = mFirstVisibleFileIndx; i < endBound; ++i)
     {
-        visibleFiles.push_back(&mFiles[i]);
+        visibleFiles.push_back(&mFiles[i].name);
     }
 
     return visibleFiles;

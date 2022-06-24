@@ -190,6 +190,8 @@ bool MusicPlayer::isFilePlayable(const std::string& path)
     BASS_Init(-1, 44100, BASS_DEVICE_3D, 0, 0);
 
     HSTREAM stream = BASS_StreamCreateFile(0, path.c_str(), 0, 0, 0);
+    bool isPlayable = stream;
+    BASS_StreamFree(stream);
 
-    return stream != 0;
+    return isPlayable;
 }

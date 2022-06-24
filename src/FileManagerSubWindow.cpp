@@ -29,11 +29,18 @@ void FileManagerSubWindow::drawHelpMenu() const
     mvprintw(y + 2, x, "(enter) - open selected directory");
     mvprintw(y + 3, x, "(o) - open directory in FileSubWi");
     mvprintw(y + 4, x + 2, "ndow(left window)");
-    mvprintw(y + 5, x, "(f) - open playlists folder / go");
-    mvprintw(y + 6, x + 2, "back where you have been before");
-    mvprintw(y + 7, x, "(d) - delete playlist or file in");
-    mvprintw(y + 8, x + 2, "playlist");
-    mvprintw(y + 9, x, "(h) - toggle help menu");        
+
+    mvprintw(y + 5, x, "(p) - open directory recursively");
+    mvprintw(y + 6, x + 2, "in FileSubWindow(left window)");
+
+    mvprintw(y + 7, x, "(o) - open directory recursively, ");
+    mvprintw(y + 8, x + 2, " appending new files");
+
+    mvprintw(y + 9, x, "(f) - open playlists folder / go");
+    mvprintw(y + 10, x + 2, "back where you have been before");
+    mvprintw(y + 11, x, "(d) - delete playlist or file in");
+    mvprintw(y + 12, x + 2, "playlist");
+    mvprintw(y + 13, x, "(h) - toggle help menu");        
 }
 
 void FileManagerSubWindow::draw() const
@@ -103,6 +110,22 @@ void FileManagerSubWindow::handleEvent(Event event)
             const auto& currentDir = mFileManager.getCurrentDirectory();
             progEvents.push_back(ProgramEvent(ProgramEventType::NewDirectory
                 , currentDir));
+            break;
+        }
+
+        case 'p':
+        {
+            const auto& currentDir = mFileManager.getCurrentDirectory();
+            progEvents.push_back(ProgramEvent(ProgramEventType::NewDirectoryAll
+                , currentDir));
+            break;
+        }
+
+        case '[':
+        {
+            const auto& currentDir = mFileManager.getCurrentDirectory();
+            progEvents.push_back(ProgramEvent(ProgramEventType::NewDirectoryAllAppend,
+                currentDir));
             break;
         }
         

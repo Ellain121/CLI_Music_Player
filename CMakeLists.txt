@@ -3,6 +3,7 @@ project(cli_music_player)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_compile_options(-ggdb)
 
 set(PROJECT_LINK_LIBS libncurses.so.6 libbass.so)
 link_directories(/lib/x86_64-gnu)

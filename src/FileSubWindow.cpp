@@ -1,5 +1,6 @@
 #include "FileSubWindow.hpp"
 #include "MusicPlayer.hpp"
+#include "Utility.hpp"
 
 
 #include "ncurses.h"
@@ -96,12 +97,34 @@ void FileSubWindow::update()
             pEvents.erase(pEvents.begin() + i);
             i--;
         }
+        if (pEvent.eventType == ProgramEventType::NewDirectoryAll)
+        {
+            openNewDirectoryAll(pEvent.info);
+            pEvents.erase(pEvents.begin() + i);
+            i--;
+        }
+        if (pEvent.eventType == ProgramEventType::NewDirectoryAllAppend)
+        {
+            openNewDirectoryAllAppend(pEvent.info);
+            pEvents.erase(pEvents.begin() + i);
+            i--;
+        }
     }
 }
 
 void FileSubWindow::openNewDirectory(const std::string& newDir)
 {
     mFileManager.openDirectory(newDir);
+}
+
+void FileSubWindow::openNewDirectoryAll(const std::string& newDir)
+{
+    mFileManager.openDirectoryAll(newDir);
+}
+
+void FileSubWindow::openNewDirectoryAllAppend(const std::string& newDir)
+{
+    mFileManager.openDirectoryAllAppend(newDir);
 }
 
 void FileSubWindow::playNextMusic()
@@ -123,10 +146,9 @@ void FileSubWindow::playPreviousMusic()
 void FileSubWindow::playActivedMusic()
 {
     auto& musicPlayer = *getContext().musPlayer;
-    auto activeFileNamePtr = mFileManager.getActiveFileName();
-    const auto& curDir = mFileManager.getCurrentDirectory();
+    auto activeFilePathPtr = mFileManager.getActiveFilePath();
 
-    musicPlayer.loadMusic(curDir + '/' + *activeFileNamePtr);
+    musicPlayer.loadMusic(*activeFilePathPtr);
     musicPlayer.play();
 }
 
@@ -139,9 +161,9 @@ void FileSubWindow::addToFavorites()
     if (answer != -1)
     {
         auto activeFileNamePtr = mFileManager.getActiveFileName();
-        const auto& curDir = mFileManager.getCurrentDirectory();
+        auto activeFilePathPtr = mFileManager.getActiveFilePath();
 
-        std::string old_path = curDir + '/' + *activeFileNamePtr;
+        std::string old_path = *activeFilePathPtr;
         std::string new_path = FileManager::getFavDirLocation() + '/' + favs[answer] + '/' + *activeFileNamePtr;
 
         FileManager::createHardLink(old_path, new_path);
@@ -152,7 +174,6 @@ void FileSubWindow::addToFavorites()
 void FileSubWindow::handleEvent(Event event)
 {
     auto& musicPlayer = *getContext().musPlayer;
-    const auto& curDir = mFileManager.getCurrentDirectory();
     switch (event)
     {
         case KEY_UP:
@@ -165,7 +186,7 @@ void FileSubWindow::handleEvent(Event event)
 
         case KEY_NORMAL_ENTER:
             mFileManager.activateSelectedFile();
-            musicPlayer.loadMusic(curDir + '/' + *mFileManager.getActiveFileName());
+            musicPlayer.loadMusic(*mFileManager.getActiveFilePath());
             musicPlayer.play();
             break;
         

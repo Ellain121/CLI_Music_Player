@@ -32,6 +32,13 @@ class FileManager
             FilesManager,
         };
 
+        struct DirEntry
+        {
+            DirEntry(const std::string& path, const std::string& name);
+            std::string path;
+            std::string name;
+        };
+
     public:
             FileManager(const std::string& directory, int screenLinesY,
                 Mode mode);
@@ -55,6 +62,7 @@ class FileManager
         int                                 getRelativeActiveFileIndx() const;
         std::size_t                         getActiveFileIndx() const;
         const std::string*                  getActiveFileName() const;
+        const std::string*                  getActiveFilePath() const;
         bool                                isAnyFileActivated() const;
 
 
@@ -66,6 +74,8 @@ class FileManager
 
         void                                openSelectedDirectory();
         void                                openDirectory(const std::string& newDir);
+        void                                openDirectoryAll(const std::string& newDir);
+        void                                openDirectoryAllAppend(const std::string& newDir);
         void                                reloadCurrentDirectory();
 
         static bool                         isDirectoryExists(const std::string& dir);   
@@ -84,7 +94,8 @@ class FileManager
     
     private:
         std::string                 mCurrentDir;
-        std::vector<std::string>    mFiles;
+        std::vector<DirEntry>       mFiles;
+
         std::size_t                 mFirstVisibleFileIndx;
         std::size_t                 mSelectedFileIndx;
         const int                   mScreenSizeY;

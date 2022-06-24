@@ -16,6 +16,8 @@ class SubWindow
             None,
             MusicFinished,
             NewDirectory,
+            NewDirectoryAll,
+            NewDirectoryAllAppend,
             ReloadFileManagerFiles,
         };
 

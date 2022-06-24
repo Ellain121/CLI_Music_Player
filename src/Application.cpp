@@ -13,6 +13,7 @@ Application::Application(const std::string& programDir)
 
 void Application::run()
 {
+    writeToDebug("--------------------PROGRAM STARTED--------------------------");
     while(true)
     {
         Event event = getch();
